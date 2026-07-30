@@ -1,0 +1,146 @@
+﻿<Window x:Class="FileRename.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FileRename"
+        mc:Ignorable="d"
+        Title="File Renamer" Height="780" Width="1080" MinHeight="640" MinWidth="880"
+        WindowStartupLocation="CenterScreen"
+        Icon="Assets/AppIcon.ico">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===================== Folders card ===================== -->
+        <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}">
+            <StackPanel>
+                <TextBlock Text="Source &amp; Destination" Style="{StaticResource SectionHeaderStyle}"/>
+
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Input folder:" VerticalAlignment="Center"/>
+                    <TextBox x:Name="InputFolderTextBox" Grid.Column="1" Margin="0,0,8,0"
+                             TextChanged="OnMaskOrFolderChanged"/>
+                    <Button Grid.Column="2" Content="Browse..." Width="100" Click="OnBrowseInputFolder"/>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" Margin="120,0,0,10">
+                    <RadioButton x:Name="RenameInPlaceRadio" Content="Rename files in place" GroupName="Mode"
+                                 IsChecked="True" Checked="OnModeChanged"/>
+                    <RadioButton x:Name="CopyToFolderRadio" Content="Copy to another folder" GroupName="Mode"
+                                 Checked="OnModeChanged"/>
+                </StackPanel>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Destination folder:" VerticalAlignment="Center"/>
+                    <TextBox x:Name="OutputFolderTextBox" Grid.Column="1" Margin="0,0,8,0" IsEnabled="False"
+                             TextChanged="OnMaskOrFolderChanged"/>
+                    <Button x:Name="BrowseOutputButton" Grid.Column="2" Content="Browse..." Width="100"
+                            IsEnabled="False" Click="OnBrowseOutputFolder"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- ===================== Masks card ===================== -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}">
+            <StackPanel>
+                <TextBlock Text="Rename Pattern" Style="{StaticResource SectionHeaderStyle}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="24"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Input mask" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBox x:Name="InputMaskTextBox" Text="DVD VIDEO RECORDER_#.mp4"
+                                 TextChanged="OnMaskOrFolderChanged"/>
+                        <TextBlock Style="{StaticResource TipTextStyle}">
+                            <Run Text="Tip: use "/>
+                            <Run Text="#" FontWeight="Bold"/>
+                            <Run Text=" to match one or more digits, and "/>
+                            <Run Text="*" FontWeight="Bold"/>
+                            <Run Text=" to match any text. Everything else must match exactly (not case-sensitive)."/>
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource TipTextStyle}" Text="Example: &quot;DVD VIDEO RECORDER_#.mp4&quot; matches both &quot;DVD VIDEO RECORDER_1.mp4&quot; and &quot;DVD VIDEO RECORDER_12.mp4&quot;."/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Output mask" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBox x:Name="OutputMaskTextBox" Text="Title-0#.mp4"
+                                 TextChanged="OnMaskOrFolderChanged"/>
+                        <TextBlock Style="{StaticResource TipTextStyle}">
+                            <Run Text="Tip: "/>
+                            <Run Text="#" FontWeight="Bold"/>
+                            <Run Text=" inserts the matched number, "/>
+                            <Run Text="*" FontWeight="Bold"/>
+                            <Run Text=" inserts matched text. Prefix "/>
+                            <Run Text="#" FontWeight="Bold"/>
+                            <Run Text=" with zeros to set a minimum width, e.g. "/>
+                            <Run Text="0#" FontWeight="Bold"/>
+                            <Run Text=" = 2 digits, "/>
+                            <Run Text="00#" FontWeight="Bold"/>
+                            <Run Text=" = 3 digits (numbers are never truncated)."/>
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource TipTextStyle}" Text="Example: &quot;Title-0#.mp4&quot; turns &quot;..._1.mp4&quot; into &quot;Title-01.mp4&quot; and &quot;..._12.mp4&quot; into &quot;Title-12.mp4&quot;."/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- ===================== Preview card ===================== -->
+        <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Preview" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    <Button Grid.Column="1" Content="Refresh Preview" Width="130" Click="OnRefreshPreview"/>
+                </Grid>
+
+                <DataGrid Grid.Row="1" x:Name="PreviewGrid">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Original Name" Binding="{Binding OriginalName}" Width="2*"/>
+                        <DataGridTextColumn Header="New Name" Binding="{Binding NewName}" Width="2*"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- ===================== Action bar ===================== -->
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText" Grid.Column="0" VerticalAlignment="Center"
+                       Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap"/>
+            <Button x:Name="ActionButton" Grid.Column="1" Content="Rename Files" Width="160"
+                    Style="{StaticResource PrimaryButtonStyle}" Click="OnPerformAction"/>
+        </Grid>
+    </Grid>
+</Window>
